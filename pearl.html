@@ -1,240 +1,240 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <style>
-            body {
-                overflow: hidden;
-            }
-            .root {
-                display: block;
-                width:100vw;
-                height:100vh;
-                position: relative;
-                overflow: hidden;
-            }
-            canvas {
-                position: relative;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%,-50%);
-            }
-        </style>
-    </head>
-    <body>
-        <div class="root">
-        <canvas
-            id="myCanvas"
-            width="500"
-            height="500"
-            style="border:1px solid rgba(100,100,100);"
-        >
+
+<head>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        .root {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: relative;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="root">
+        <canvas id="myCanvas" width="500" height="500" style="border:1px solid rgba(100,100,100);">
             Your browser does not support the HTML canvas tag.
         </canvas>
     </div>
-        <script>
-var items = [];
-var L = 16;
-var W=500;
-var H=500;
-for (var i=0;i<4;++i) {
-items.push({x: 50, y: 200+i*L,size:L});
-}
-var bricksGrid=[
-    [0,0,0,0,0,0,0,0,0],
-    [0,1,1,1,0,1,1,1,0],
-    [0,1,0,0,0,0,0,1,0],
-    [0,1,0,0,0,0,0,1,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,1,0,0,0,0,0,1,0],
-    [0,1,0,0,0,0,0,1,0],
-    [0,1,1,1,0,1,1,1,0],
-    [0,0,0,0,0,0,0,0,0],
-]
-var canvas = document.getElementById("myCanvas");
-const ctx = canvas.getContext("2d");
-// 2. Create a new Image object
-const img = new Image();
-const food_img = new Image();
+    <script>
+        var items = [];
+        var L = 16;
+        var W = 500;
+        var H = 500;
+        for (var i = 0; i < 4; ++i) {
+            items.push({ x: 50, y: 200 + i * L, size: L });
+        }
+        var bricksGrid = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        var canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+        // 2. Create a new Image object
+        const img = new Image();
+        const food_img = new Image();
 
-// 3. Define what happens AFTER the image loads
-img.onload = function() {
-    // 4. Draw the image onto the canvas at coordinates (x: 0, y: 0)
-    ctx.drawImage(img, 0, 0);
-};
+        // 3. Define what happens AFTER the image loads
+        img.onload = function () {
+            // 4. Draw the image onto the canvas at coordinates (x: 0, y: 0)
+            ctx.drawImage(img, 0, 0);
+        };
 
-// 5. Set the source URL (this triggers the loading process)
-img.src = "./pearl.png";
-food_img.src = "./food.png";
-keys = {}
-angle = -Math.PI / 2;
-d = 5*Math.PI / 180;
-let foods = [{ x: 300, y: 300, size:L}]
-let speed=1;
-let score=0;
-function wrap(item){
-    var x=item.x;
-    while (x>W)x=x-W;
-    while(x<0)x=W+x;
-    var y=item.y;
-    if (y>H)y=y-H;
-    while(y<0)y=H+y;
-    return {x:x,y:y, size:item.size};
-}
-let eatAudio = new Audio('./marble.mp3');
-let bricks=[]
-for (var i=0;i<9;++i){
-    for (var j=0;j<9;++j){
-        if (!bricksGrid[i][j]) continue;
-       
-        var size=40;
-      var ox=(W-size*9)/2;
-        var oy=(H-size*9)/2;
-        var x=i*size;
-        var y=j*size;
-        bricks.push({x:x+ox,y:y+oy,size:size})
-    }
-}
+        // 5. Set the source URL (this triggers the loading process)
+        img.src = "./pearl.png";
+        food_img.src = "./food.png";
+        keys = {}
+        angle = -Math.PI / 2;
+        d = 5 * Math.PI / 180;
+        let foods = [{ x: 300, y: 300, size: L }]
+        let speed = 1;
+        let score = 0;
+        function wrap(item) {
+            var x = item.x;
+            while (x > W) x = x - W;
+            while (x < 0) x = W + x;
+            var y = item.y;
+            if (y > H) y = y - H;
+            while (y < 0) y = H + y;
+            return { x: x, y: y, size: item.size };
+        }
+        let eatAudio = new Audio('./marble.mp3');
+        let bricks = []
+        for (var i = 0; i < 9; ++i) {
+            for (var j = 0; j < 9; ++j) {
+                if (!bricksGrid[i][j]) continue;
 
-function distance(a, b) {
-    return Math.hypot(a.x-b.x,a.y-b.y);
-}
-
-function collide(circle,rc) {
- 
-    if (distance(circle,{x:rc.x,y:rc.y})<circle.size/2) return true
-    if (distance(circle,{x:rc.x,y:rc.y+rc.size})<circle.size/2) return true
-
-    if (distance(circle,{x:rc.x+rc.size,y:rc.y})<circle.size/2) return true
-
-    if (distance(circle,{x:rc.x+rc.size,y:rc.y+rc.size})<circle.size/2) return true
-    
-    if (circle.x+circle.size/2 <rc.x) return false;
-    if (circle.x-circle.size/2 >rc.x+rc.size) return false;
-    if (circle.y+circle.size/2 <rc.y) return false;
-    if (circle.y-circle.size/2 >rc.y+rc.size) return false;
-    
-    return true
-}
-
-let crash=false;
-function step() {
- if (keys["ArrowLeft"]) {
-        angle -= d;
-    }
-     if (keys["ArrowRight"]) {
-        angle += d;
-    }
-if (!crash) {
-        items[0].x += speed* Math.cos(angle);
-items[0].y += speed* Math.sin(angle);
-
-    }
-   var virtualhead=wrap(items[0]);
-   var food = foods[foods.length-1];
-   if (Math.hypot(virtualhead.x-food.x,virtualhead.y-food.y)<L){
-    eatAudio.play();
-    while (true){
-        var x= Math.random()*(W-L)
-        var y=Math.random()*(H-L)
-        let skip=false
-        for (var i=0;i<bricks.length;++i) {
-            if (collide({x,y,size},bricks[i])) {
-                skip=true;
-                break;
+                var size = 40;
+                var ox = (W - size * 9) / 2;
+                var oy = (H - size * 9) / 2;
+                var x = i * size;
+                var y = j * size;
+                bricks.push({ x: x + ox, y: y + oy, size: size })
             }
         }
-        if (!skip) {
-            foods.push({ x: x, y:y, size: L});
-            break;
-        }
-    }
-   speed+=0.1;
-   score++;
-   items.push({x:items[items.length-1].x,y:items[items.length-1].y,size:L});
-   }
-    for (var j=0;j<items.length;++j){
-         for (var i=0;i<bricks.length;++i) {
 
-            if (collide(wrap(items[j]),bricks[i])) {
-            crash=true;
+        function distance(a, b) {
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        function collide(circle, rc) {
+
+            if (distance(circle, { x: rc.x, y: rc.y }) < circle.size / 2) return true
+            if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < circle.size / 2) return true
+
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y }) < circle.size / 2) return true
+
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y + rc.size }) < circle.size / 2) return true
+
+            if (circle.x + circle.size / 2 < rc.x) return false;
+            if (circle.x - circle.size / 2 > rc.x + rc.size) return false;
+            if (circle.y + circle.size / 2 < rc.y) return false;
+            if (circle.y - circle.size / 2 > rc.y + rc.size) return false;
+
+            return true
+        }
+
+        let crash = false;
+        function step() {
+            if (keys["ArrowLeft"]) {
+                angle -= d;
             }
+            if (keys["ArrowRight"]) {
+                angle += d;
+            }
+            if (!crash) {
+                items[0].x += speed * Math.cos(angle);
+                items[0].y += speed * Math.sin(angle);
+
+            }
+            var virtualhead = wrap(items[0]);
+            var food = foods[foods.length - 1];
+            if (Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < L) {
+                eatAudio.play();
+                while (true) {
+                    var x = Math.random() * (W - L)
+                    var y = Math.random() * (H - L)
+                    let skip = false
+                    for (var i = 0; i < bricks.length; ++i) {
+                        if (collide({ x, y, size }, bricks[i])) {
+                            skip = true;
+                            break;
+                        }
+                    }
+                    if (!skip) {
+                        foods.push({ x: x, y: y, size: L });
+                        break;
+                    }
+                }
+                speed += 0.1;
+                score++;
+                items.push({ x: items[items.length - 1].x, y: items[items.length - 1].y, size: L });
+            }
+            for (var j = 0; j < items.length; ++j) {
+                for (var i = 0; i < bricks.length; ++i) {
+
+                    if (collide(wrap(items[j]), bricks[i])) {
+                        crash = true;
+                    }
+
+                }
+            }
+            if (!crash) {
+                const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
+
+                // Add three color stops
+                gradient.addColorStop(0, "silver");
+                gradient.addColorStop(0.5, "white");
+                gradient.addColorStop(1, "#fff");
+
+                // Set the fill style and draw a rectangle
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (var i = 1; i < items.length; ++i) {
+                    var dist = Math.hypot(items[i].x - items[i - 1].x, items[i].y - items[i - 1].y);
+                    var u = items[i - 1].x - items[i].x;
+                    var v = items[i - 1].y - items[i].y;
+                    u /= dist;
+                    v /= dist;
+                    items[i].x = items[i - 1].x - u * L;
+                    items[i].y = items[i - 1].y - v * L;
+
+                }
+            }
+            // handle out of screen
+            for (var i = 0; i < items.length; ++i) {
+                var item = items[i];
+                var vitem = wrap(item);
+
+                ctx.drawImage(img, vitem.x - L / 2, vitem.y - L / 2, L, L);
+
+            }
+            for (var i = 0; i < foods.length; ++i) {
+                var food = foods[i];
+                ctx.drawImage(food_img, food.x - food.size / 2, food.y - food.size / 2, food.size, food.size);
+
+            }
+            foods = foods.filter(f => f.size > 0);
+            for (var i = 0; i + 1 < foods.length; ++i) {
+                foods[i].size--;
+            }
+            for (var j = 0; j < bricks.length; ++j) {
+
+                var x = bricks[j].x;
+                var y = bricks[j].y;
+                var g = ctx.createLinearGradient(x, y, x + bricks[j].size, y + bricks[j].size)
+                g.addColorStop(0, "rgb(230,230,230)");
+                g.addColorStop(1, "grey");
+
+                ctx.fillStyle = g;
+                ctx.fillRect(x, y, bricks[j].size, bricks[j].size);
+
+            }
+            ctx.fillStyle = "rgb(0,0,0)";
+            ctx.font = "20px Ariel";
+            ctx.fillText("Score " + score, W - 80, 30);
+            if (crash) {
+                ctx.fillStyle = "#f00";
+
+                ctx.fillText("CRASH", W / 2 - 40, H / 2);
+            }
+            requestAnimationFrame(step);
 
         }
-    }
-    if (!crash) {
-  const gradient = ctx.createRadialGradient(W/2, H/2, 20, W/2, H/2, W);
 
-// Add three color stops
-gradient.addColorStop(0, "silver");
-gradient.addColorStop(0.5, "white");
-gradient.addColorStop(1, "#fff");
+        requestAnimationFrame(step);
+        document.addEventListener("keyup", (event) => {
+            keys[event.key] = false;
+        });
+        document.addEventListener("keydown", (event) => {
+            console.log(`Key pressed: ${event.key}`);
+            keys[event.key] = true;
 
-// Set the fill style and draw a rectangle
-ctx.fillStyle = gradient;
-ctx.fillRect(0,0,canvas.width,canvas.height);
 
-for (var i=1;i<items.length;++i) {
-    var dist = Math.hypot(items[i].x-items[i-1].x,items[i].y-items[i-1].y);
-    var u = items[i-1].x-items[i].x;
-    var v = items[i-1].y-items[i].y;
-    u/=dist;
-    v/=dist;
-    items[i].x=items[i-1].x-u*L;
-    items[i].y=items[i-1].y-v*L;
-    
-}
-    }
-// handle out of screen
-for (var i=0;i<items.length;++i) {
-   var item=items[i];
-   var vitem=wrap(item);
+        });
+    </script>
+</body>
 
-   ctx.drawImage(img, vitem.x-L/2,vitem.y-L/2,L,L);
-
-}
-for (var i=0;i<foods.length;++i){
-    var food=foods[i];
-    ctx.drawImage(food_img, food.x-food.size/2, food.y-food.size/2, food.size,food.size);
-    
-}
-foods=foods.filter(f=>f.size>0);
-for (var i=0;i+1<foods.length;++i){
-    foods[i].size--;
-}
-    for (var j=0;j<bricks.length;++j){
-        
-        var x=bricks[j].x;
-        var y=bricks[j].y;
-        var g = ctx.createLinearGradient(x,y,x+bricks[j].size, y+bricks[j].size)
-        g.addColorStop(0, "rgb(230,230,230)");
-        g.addColorStop(1, "grey");
-        
-        ctx.fillStyle=g;
-        ctx.fillRect(x, y, bricks[j].size,bricks[j].size);
-
-    }
-ctx.fillStyle="rgb(0,0,0)";
-ctx.font="20px Ariel";
-ctx.fillText("Score " + score, W-80,30);
-if (crash) {
-    ctx.fillStyle="#f00";
-
-ctx.fillText("CRASH", W/2-40,H/2);
-}
-requestAnimationFrame(step);
-
-}
-
-requestAnimationFrame(step);
-document.addEventListener("keyup", (event) => {
-   keys[event.key] = false;
-});
-document.addEventListener("keydown", (event) => {
-    console.log(`Key pressed: ${event.key}`);
-keys[event.key] = true;
-   
-    
-});
-        </script>
-    </body>
 </html>
