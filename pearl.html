@@ -54,6 +54,7 @@
         // 2. Create a new Image object
         const img = new Image();
         const food_img = new Image();
+        const brick = new Image();
 
         // 3. Define what happens AFTER the image loads
         img.onload = function () {
@@ -64,6 +65,7 @@
         // 5. Set the source URL (this triggers the loading process)
         img.src = "./pearl.png";
         food_img.src = "./food.png";
+        brick.src="./brick.png"
         keys = {}
         angle = -Math.PI / 2;
         d = 5 * Math.PI / 180;
@@ -99,18 +101,18 @@
         }
 
         function collide(circle, rc) {
+            const sz = circle.size - 4
+            if (distance(circle, { x: rc.x, y: rc.y }) < sz / 2) return true
+            if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < sz / 2) return true
 
-            if (distance(circle, { x: rc.x, y: rc.y }) < circle.size / 2) return true
-            if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < circle.size / 2) return true
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y }) < sz / 2) return true
 
-            if (distance(circle, { x: rc.x + rc.size, y: rc.y }) < circle.size / 2) return true
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y + rc.size }) < sz / 2) return true
 
-            if (distance(circle, { x: rc.x + rc.size, y: rc.y + rc.size }) < circle.size / 2) return true
-
-            if (circle.x + circle.size / 2 < rc.x) return false;
-            if (circle.x - circle.size / 2 > rc.x + rc.size) return false;
-            if (circle.y + circle.size / 2 < rc.y) return false;
-            if (circle.y - circle.size / 2 > rc.y + rc.size) return false;
+            if (circle.x + sz / 2 < rc.x) return false;
+            if (circle.x - sz / 2 > rc.x + rc.size) return false;
+            if (circle.y + sz / 2 < rc.y) return false;
+            if (circle.y - sz / 2 > rc.y + rc.size) return false;
 
             return true
         }
@@ -149,7 +151,7 @@
                 }
                 speed += 0.1;
                 score++;
-                items.push({ x: items[items.length - 1].x, y: items[items.length - 1].y, size: L });
+                items = [...items, {x: items[0].x, y:items[0].y,size:L}]
             }
             for (var j = 0; j < items.length; ++j) {
                 for (var i = 0; i < bricks.length; ++i) {
@@ -204,12 +206,8 @@
 
                 var x = bricks[j].x;
                 var y = bricks[j].y;
-                var g = ctx.createLinearGradient(x, y, x + bricks[j].size, y + bricks[j].size)
-                g.addColorStop(0, "rgb(230,230,230)");
-                g.addColorStop(1, "grey");
-
-                ctx.fillStyle = g;
-                ctx.fillRect(x, y, bricks[j].size, bricks[j].size);
+                
+                ctx.drawImage(brick, x,y,bricks[j].size, bricks[j].size);
 
             }
             ctx.fillStyle = "rgb(0,0,0)";
