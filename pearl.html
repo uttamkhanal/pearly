@@ -32,7 +32,7 @@
     </div>
     <script>
         var items = [];
-        var L = 16;
+        var L = 18;
         var W = 500;
         var H = 500;
         for (var i = 0; i < 4; ++i) {
@@ -72,6 +72,9 @@
         let foods = [{ x: 300, y: 300, size: L }]
         let speed = 1;
         let score = 0;
+        
+        const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
+
         function wrap(item) {
             var x = item.x;
             while (x > W) x = x - W;
@@ -97,17 +100,17 @@
         }
 
         function distance(a, b) {
-            return Math.hypot(a.x - b.x, a.y - b.y);
+            return (a.x - b.x)*(a.x-b.x)+(a.y - b.y)*(a.y-b.y);
         }
 
         function collide(circle, rc) {
             const sz = circle.size - 4
-            if (distance(circle, { x: rc.x, y: rc.y }) < sz / 2) return true
-            if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < sz / 2) return true
+            if (distance(circle, { x: rc.x, y: rc.y }) < sz*sz/4) return true
+            if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < sz*sz/4) return true
 
-            if (distance(circle, { x: rc.x + rc.size, y: rc.y }) < sz / 2) return true
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y }) < sz*sz/4) return true
 
-            if (distance(circle, { x: rc.x + rc.size, y: rc.y + rc.size }) < sz / 2) return true
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y + rc.size }) < sz*sz/4) return true
 
             if (circle.x + sz / 2 < rc.x) return false;
             if (circle.x - sz / 2 > rc.x + rc.size) return false;
@@ -162,8 +165,7 @@
 
                 }
             }
-            if (!crash) {
-                const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
+
 
                 // Add three color stops
                 gradient.addColorStop(0, "silver");
@@ -173,25 +175,42 @@
                 // Set the fill style and draw a rectangle
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+                
+                let iter=2;
+                while (iter--) {
                 for (var i = 1; i < items.length; ++i) {
                     var dist = Math.hypot(items[i].x - items[i - 1].x, items[i].y - items[i - 1].y);
                     var u = items[i - 1].x - items[i].x;
                     var v = items[i - 1].y - items[i].y;
                     u /= dist;
                     v /= dist;
-                    items[i].x = items[i - 1].x - u * L;
-                    items[i].y = items[i - 1].y - v * L;
+                    var LAfterClip = L-2;
+                    const dx=u * (LAfterClip-dist)*0.25
+                    const dy=v * (LAfterClip-dist)*0.25
+                    items[i].x -=dx;
+                    items[i].y -=dy;
 
+                    items[i-1].x += dx;
+                    items[i-1].y += dy
                 }
             }
+
             // handle out of screen
             for (var i = 0; i < items.length; ++i) {
                 var item = items[i];
                 var vitem = wrap(item);
+                
+                 var w=L
+                 var x = vitem.x
+                 var y = vitem.y
+            
+                ctx.beginPath();
+                ctx.arc(x,y,w/2-1,0,Math.PI*2);
+                ctx.save();
+                ctx.clip();
 
-                ctx.drawImage(img, vitem.x - L / 2, vitem.y - L / 2, L, L);
-
+                ctx.drawImage(img, x-w/2,y-w/2,w,w);
+                ctx.restore();
             }
             for (var i = 0; i < foods.length; ++i) {
                 var food = foods[i];
