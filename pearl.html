@@ -72,9 +72,6 @@
         let foods = [{ x: 300, y: 300, size: L }]
         let speed = 1;
         let score = 0;
-        
-        const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
-
         function wrap(item) {
             var x = item.x;
             while (x > W) x = x - W;
@@ -100,17 +97,17 @@
         }
 
         function distance(a, b) {
-            return (a.x - b.x)*(a.x-b.x)+(a.y - b.y)*(a.y-b.y);
+            return Math.hypot(a.x - b.x, a.y - b.y);
         }
 
         function collide(circle, rc) {
             const sz = circle.size - 4
-            if (distance(circle, { x: rc.x, y: rc.y }) < sz*sz/4) return true
-            if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < sz*sz/4) return true
+            if (distance(circle, { x: rc.x, y: rc.y }) < sz / 2) return true
+            if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < sz / 2) return true
 
-            if (distance(circle, { x: rc.x + rc.size, y: rc.y }) < sz*sz/4) return true
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y }) < sz / 2) return true
 
-            if (distance(circle, { x: rc.x + rc.size, y: rc.y + rc.size }) < sz*sz/4) return true
+            if (distance(circle, { x: rc.x + rc.size, y: rc.y + rc.size }) < sz / 2) return true
 
             if (circle.x + sz / 2 < rc.x) return false;
             if (circle.x - sz / 2 > rc.x + rc.size) return false;
@@ -166,6 +163,7 @@
                 }
             }
 
+            const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
 
                 // Add three color stops
                 gradient.addColorStop(0, "silver");
@@ -176,7 +174,7 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                let iter=2;
+                let iter=1;
                 while (iter--) {
                 for (var i = 1; i < items.length; ++i) {
                     var dist = Math.hypot(items[i].x - items[i - 1].x, items[i].y - items[i - 1].y);
@@ -185,8 +183,8 @@
                     u /= dist;
                     v /= dist;
                     var LAfterClip = L-2;
-                    const dx=u * (LAfterClip-dist)*0.25
-                    const dy=v * (LAfterClip-dist)*0.25
+                    const dx=u * (LAfterClip-dist)/2*0.5
+                    const dy=v * (LAfterClip-dist)/2*0.5
                     items[i].x -=dx;
                     items[i].y -=dy;
 
@@ -195,6 +193,8 @@
                 }
             }
 
+            
+           
             // handle out of screen
             for (var i = 0; i < items.length; ++i) {
                 var item = items[i];
