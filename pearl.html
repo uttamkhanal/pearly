@@ -77,6 +77,9 @@
         angle = -Math.PI / 2;
         d = 5 * Math.PI / 180;
         let foods = [{ x: 300, y: 300, size: L }]
+
+        const rockets = [ { x: 10, y: 50, size: 20 }, {x: 100, y:H-50, size:20 } ]
+
         let speed = 1;
         let score = 0;
         function wrap(item) {
@@ -108,7 +111,7 @@
         }
 
         function collide(circle, rc) {
-            const sz = circle.size - 6
+            const sz = circle.size
             if (distance(circle, { x: rc.x, y: rc.y }) < sz / 2) return true
             if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < sz / 2) return true
 
@@ -125,6 +128,7 @@
         }
 
         let crash = false;
+        let maxSpeed=speed;
         function step() {
             if (keys["ArrowLeft"]) {
                 angle -= d;
@@ -157,13 +161,28 @@
                     }
                 }
                 speed += 0.1;
+                maxSpeed=speed;
                 score++;
-                items = [...items, {x: items[0].x, y:items[0].y,size:L}]
+                const VX = virtualhead.x - items[0].x;
+                const VY = virtualhead.y - items[0].y; 
+                items = [{x: food.x - VX, y:food.y-VY,size:L},...items]
+            }
+            if (speed > maxSpeed) speed-=0.02;
+              for (var j = 0; j < 1; ++j) {
+                for (var i = 0; i < rockets.length; ++i) {
+
+                    if (collide(wrap({...items[j], size: items[j].size-6}), rockets[i])) {
+                        speed=3;
+                        rockets[i].invisible=true;
+                        break;
+                    }
+
+                }
             }
             for (var j = 0; j < items.length; ++j) {
                 for (var i = 0; i < bricks.length; ++i) {
 
-                    if (collide(wrap(items[j]), bricks[i])) {
+                    if (collide(wrap({...items[j], size: items[j].size-6}), bricks[i])) {
                         crash = true;
                     }
 
@@ -192,6 +211,16 @@
                 }
             }
 
+            const drawImage = (img, x, y, w, cr) => {
+                
+                ctx.beginPath();
+                ctx.arc(x,y,Math.max(0,w/2-cr),0,Math.PI*2);
+                ctx.save();
+                ctx.clip();
+
+                ctx.drawImage(img, x-w/2,y-w/2,w,w);
+                ctx.restore();
+            }
             
            
             // handle out of screen
@@ -203,23 +232,27 @@
                  var x = vitem.x
                  var y = vitem.y
             
-                ctx.beginPath();
-                ctx.arc(x,y,w/2-1,0,Math.PI*2);
-                ctx.save();
-                ctx.clip();
-
-                ctx.drawImage(img, x-w/2,y-w/2,w,w);
-                ctx.restore();
+                drawImage(img, x, y, w, 1)
             }
             for (var i = 0; i < foods.length; ++i) {
                 var food = foods[i];
-                ctx.drawImage(food_img, food.x - food.size / 2, food.y - food.size / 2, food.size, food.size);
+                drawImage(food_img, food.x, food.y, food.size, 2)
 
             }
             foods = foods.filter(f => f.size > 0);
             for (var i = 0; i + 1 < foods.length; ++i) {
                 foods[i].size--;
             }
+
+             for (var i = 0; i < rockets.length; ++i) {
+                var rocket = rockets[i];
+                var w=10;
+                ctx.fillStyle="red"
+                if (rockets[i].invisible)continue;
+                ctx.fillRect(rocket.x-w/2, rocket.y-w/2,w,w);
+                //ctx.drawImage(food_img, food.x - food.size / 2, food.y - food.size / 2, food.size, food.size);
+            }
+
             for (var j = 0; j < bricks.length; ++j) {
 
                 var x = bricks[j].x;
@@ -230,7 +263,7 @@
             }
             ctx.fillStyle = "rgb(0,0,0)";
             ctx.font = "20px Ariel";
-            ctx.fillText("Score " + score, W - 80, 30);
+            ctx.fillText("SCORE " + score, W - 80, 30);
             if (crash) {
                 ctx.fillStyle = "#f00";
 
