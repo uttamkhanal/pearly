@@ -62,6 +62,13 @@
             ctx.drawImage(img, 0, 0);
         };
 
+        const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
+
+        // Add three color stops
+        gradient.addColorStop(0, "silver");
+        gradient.addColorStop(0.5, "white");
+        gradient.addColorStop(1, "#fff");
+
         // 5. Set the source URL (this triggers the loading process)
         img.src = "./pearl.png";
         food_img.src = "./food.png";
@@ -101,7 +108,7 @@
         }
 
         function collide(circle, rc) {
-            const sz = circle.size - 4
+            const sz = circle.size - 6
             if (distance(circle, { x: rc.x, y: rc.y }) < sz / 2) return true
             if (distance(circle, { x: rc.x, y: rc.y + rc.size }) < sz / 2) return true
 
@@ -163,18 +170,13 @@
                 }
             }
 
-            const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
-
-                // Add three color stops
-                gradient.addColorStop(0, "silver");
-                gradient.addColorStop(0.5, "white");
-                gradient.addColorStop(1, "#fff");
+           
 
                 // Set the fill style and draw a rectangle
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                let iter=1;
+                let iter=2;
                 while (iter--) {
                 for (var i = 1; i < items.length; ++i) {
                     var dist = Math.hypot(items[i].x - items[i - 1].x, items[i].y - items[i - 1].y);
@@ -182,14 +184,11 @@
                     var v = items[i - 1].y - items[i].y;
                     u /= dist;
                     v /= dist;
-                    var LAfterClip = L-2;
-                    const dx=u * (LAfterClip-dist)/2*0.5
-                    const dy=v * (LAfterClip-dist)/2*0.5
+                    var LAfterClip = L-3;
+                    const dx=u * (LAfterClip-dist)*0.5
+                    const dy=v * (LAfterClip-dist)*0.5
                     items[i].x -=dx;
                     items[i].y -=dy;
-
-                    items[i-1].x += dx;
-                    items[i-1].y += dy
                 }
             }
 
