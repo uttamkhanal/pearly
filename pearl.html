@@ -55,6 +55,7 @@
         const img = new Image();
         const food_img = new Image();
         const brick = new Image();
+        const sea_img = new Image();
 
         // 3. Define what happens AFTER the image loads
         img.onload = function () {
@@ -72,13 +73,19 @@
         // 5. Set the source URL (this triggers the loading process)
         img.src = "./pearl.png";
         food_img.src = "./food.png";
-        brick.src="./brick.png"
+        sea_img.src = "./sea.jpg";
+        brick.src = "./brick.png"
         keys = {}
         angle = -Math.PI / 2;
         d = 5 * Math.PI / 180;
         let foods = [{ x: 300, y: 300, size: L }]
 
-        const rockets = [ { x: 10, y: 50, size: 20 }, {x: 100, y:H-50, size:20 } ]
+        const rockets = [
+            { x: 50, y: 50, size: 20 }, 
+            { x: 50, y: H - 50, size: 20 },
+            { x: W-50, y: 50, size: 20 }, 
+            { x: W-50, y: H - 50, size: 20 },
+        ]
 
         let speed = 1;
         let score = 0;
@@ -128,7 +135,8 @@
         }
 
         let crash = false;
-        let maxSpeed=speed;
+        let maxSpeed = speed;
+        let caughtFood;
         function step() {
             if (keys["ArrowLeft"]) {
                 angle -= d;
@@ -143,8 +151,10 @@
             }
             var virtualhead = wrap(items[0]);
             var food = foods[foods.length - 1];
-            if (Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < L) {
+            
+            if (Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < 4*L) {
                 eatAudio.play();
+                caughtFood = food;
                 while (true) {
                     var x = Math.random() * (W - L)
                     var y = Math.random() * (H - L)
@@ -161,19 +171,29 @@
                     }
                 }
                 speed += 0.1;
-                maxSpeed=speed;
+                maxSpeed = speed;
                 score++;
-                const VX = virtualhead.x - items[0].x;
-                const VY = virtualhead.y - items[0].y; 
-                items = [{x: food.x - VX, y:food.y-VY,size:L},...items]
+               
             }
-            if (speed > maxSpeed) speed-=0.02;
-              for (var j = 0; j < 1; ++j) {
+            if (caughtFood) {
+                
+                if (Math.hypot(virtualhead.x - caughtFood.x, virtualhead.y - caughtFood.y) <L) {
+                    const VX = virtualhead.x - items[0].x;
+                    const VY = virtualhead.y - items[0].y;
+                    items = [{ x: caughtFood.x - VX, y: caughtFood.y - VY, size: L }, ...items]
+                    caughtFood = undefined;
+                } else {
+                    caughtFood.x += (virtualhead.x - caughtFood.x) / 3
+                    caughtFood.y += (virtualhead.y - caughtFood.y) / 3
+                }
+            }
+            if (speed > maxSpeed) speed -= 0.02;
+            for (var j = 0; j < 1; ++j) {
                 for (var i = 0; i < rockets.length; ++i) {
 
-                    if (collide(wrap({...items[j], size: items[j].size-6}), rockets[i])) {
-                        speed=3;
-                        rockets[i].invisible=true;
+                    if (collide(wrap({ ...items[j], size: items[j].size - 6 }), rockets[i])) {
+                        speed = 3;
+                        rockets[i].invisible = true;
                         break;
                     }
 
@@ -182,56 +202,60 @@
             for (var j = 0; j < items.length; ++j) {
                 for (var i = 0; i < bricks.length; ++i) {
 
-                    if (collide(wrap({...items[j], size: items[j].size-6}), bricks[i])) {
+                    if (collide(wrap({ ...items[j], size: items[j].size - 6 }), bricks[i])) {
                         crash = true;
                     }
 
                 }
             }
 
-           
 
-                // Set the fill style and draw a rectangle
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                let iter=2;
-                while (iter--) {
+
+            // Set the fill style and draw a rectangle
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 0.4;
+
+            ctx.drawImage(sea_img, 0, 0, W, H);
+            ctx.globalAlpha=1;
+            
+            let iter = 2;
+            while (iter--) {
                 for (var i = 1; i < items.length; ++i) {
                     var dist = Math.hypot(items[i].x - items[i - 1].x, items[i].y - items[i - 1].y);
                     var u = items[i - 1].x - items[i].x;
                     var v = items[i - 1].y - items[i].y;
                     u /= dist;
                     v /= dist;
-                    var LAfterClip = L-3;
-                    const dx=u * (LAfterClip-dist)*0.5
-                    const dy=v * (LAfterClip-dist)*0.5
-                    items[i].x -=dx;
-                    items[i].y -=dy;
+                    var LAfterClip = L - 3;
+                    const dx = u * (LAfterClip - dist) * 0.5
+                    const dy = v * (LAfterClip - dist) * 0.5
+                    items[i].x -= dx;
+                    items[i].y -= dy;
                 }
             }
 
             const drawImage = (img, x, y, w, cr) => {
-                
+
                 ctx.beginPath();
-                ctx.arc(x,y,Math.max(0,w/2-cr),0,Math.PI*2);
+                ctx.arc(x, y, Math.max(0, w / 2 - cr), 0, Math.PI * 2);
                 ctx.save();
                 ctx.clip();
 
-                ctx.drawImage(img, x-w/2,y-w/2,w,w);
+                ctx.drawImage(img, x - w / 2, y - w / 2, w, w);
                 ctx.restore();
             }
-            
-           
+
+
             // handle out of screen
             for (var i = 0; i < items.length; ++i) {
                 var item = items[i];
                 var vitem = wrap(item);
-                
-                 var w=L
-                 var x = vitem.x
-                 var y = vitem.y
-            
+
+                var w = L
+                var x = vitem.x
+                var y = vitem.y
+
                 drawImage(img, x, y, w, 1)
             }
             for (var i = 0; i < foods.length; ++i) {
@@ -244,12 +268,12 @@
                 foods[i].size--;
             }
 
-             for (var i = 0; i < rockets.length; ++i) {
+            for (var i = 0; i < rockets.length; ++i) {
                 var rocket = rockets[i];
-                var w=10;
-                ctx.fillStyle="red"
-                if (rockets[i].invisible)continue;
-                ctx.fillRect(rocket.x-w/2, rocket.y-w/2,w,w);
+                var w = 10;
+                ctx.fillStyle = "red"
+                if (rockets[i].invisible) continue;
+                ctx.fillRect(rocket.x - w / 2, rocket.y - w / 2, w, w);
                 //ctx.drawImage(food_img, food.x - food.size / 2, food.y - food.size / 2, food.size, food.size);
             }
 
@@ -257,8 +281,8 @@
 
                 var x = bricks[j].x;
                 var y = bricks[j].y;
-                
-                ctx.drawImage(brick, x,y,bricks[j].size, bricks[j].size);
+
+                ctx.drawImage(brick, x, y, bricks[j].size, bricks[j].size);
 
             }
             ctx.fillStyle = "rgb(0,0,0)";
