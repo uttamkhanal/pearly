@@ -158,10 +158,31 @@
             var virtualhead = wrap(items[0]);
             var food = foods[foods.length - 1];
             
-            if (Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < 4*DIAMETER) {
+            if (!caughtFood&&Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < 4*DIAMETER) {
                 eatAudio.play();
                 caughtFood = food;
-                while (true) {
+                
+                speed += 0.1;
+                maxSpeed = speed;
+                score++;
+               
+            }
+            if (caughtFood) {
+                const u = Math.cos(angle);
+                const v = Math.sin(angle);
+
+                const target = {x: virtualhead.x + u * DIAMETER,y:virtualhead.y+v*DIAMETER};
+                
+                // console.log('dist', Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y));
+                if (Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y) <10) {
+                    const VX = virtualhead.x - items[0].x;
+                    const VY = virtualhead.y - items[0].y;
+                    items = [{ x: caughtFood.x - VX, y: caughtFood.y - VY, size: DIAMETER }, ...items]
+                    console.log('eat');
+                    caughtFood.eaten=true;
+                    caughtFood = undefined;
+
+                    while (true) {
                     var x = Math.random() * (W - DIAMETER)
                     var y = Math.random() * (H - DIAMETER)
                     let skip = false
@@ -176,25 +197,11 @@
                         break;
                     }
                 }
-                speed += 0.1;
-                maxSpeed = speed;
-                score++;
-               
-            }
-            if (caughtFood) {
-                const u = Math.cos(angle);
-                const v = Math.sin(angle);
-
-                const target = {x: virtualhead.x + u * DIAMETER,y:virtualhead.y+v*DIAMETER};
-
-                if (Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y) <1) {
-                    const VX = virtualhead.x - items[0].x;
-                    const VY = virtualhead.y - items[0].y;
-                    items = [{ x: caughtFood.x - VX, y: caughtFood.y - VY, size: DIAMETER }, ...items]
-                    caughtFood = undefined;
                 } else {
-                    caughtFood.x += (target.x - caughtFood.x) / 3
-                    caughtFood.y += (target.y - caughtFood.y) / 3
+                    // console.log('eating');
+
+                    caughtFood.x += (target.x - caughtFood.x) / 2
+                    caughtFood.y += (target.y - caughtFood.y) / 2
                 }
             }
             if (speed > maxSpeed) speed -= 0.02;
@@ -268,14 +275,11 @@
             }
             for (var i = 0; i < foods.length; ++i) {
                 var food = foods[i];
+                if (food.eaten) continue;
                 drawImage(food_img, food.x, food.y, food.size, 2)
 
             }
-            foods = foods.filter(f => f.size > 0);
-            for (var i = 0; i + 1 < foods.length; ++i) {
-                foods[i].size--;
-            }
-
+            
             for (var i = 0; i < rockets.length; ++i) {
                 var rocket = rockets[i];
                 if (rockets[i].invisible) continue;
