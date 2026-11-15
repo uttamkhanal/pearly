@@ -32,11 +32,11 @@
     </div>
     <script>
         var items = [];
-        var L = 18;
+        var DIAMETER = 18;
         var W = 500;
         var H = 500;
         for (var i = 0; i < 4; ++i) {
-            items.push({ x: 50, y: 200 + i * L, size: L });
+            items.push({ x: 50, y: 200 + i * DIAMETER, size: DIAMETER });
         }
         var bricksGrid = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -56,12 +56,20 @@
         const food_img = new Image();
         const brick = new Image();
         const sea_img = new Image();
+        const slider = new Image();
 
         // 3. Define what happens AFTER the image loads
         img.onload = function () {
             // 4. Draw the image onto the canvas at coordinates (x: 0, y: 0)
             ctx.drawImage(img, 0, 0);
         };
+    
+        // 5. Set the source URL (this triggers the loading process)
+        img.src = "./pearl.png";
+        food_img.src = "./food.png";
+        sea_img.src = "./sea.jpg";
+        brick.src = "./brick.png"
+        slider.src = "./slider.png"
 
         const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
 
@@ -70,21 +78,19 @@
         gradient.addColorStop(0.5, "white");
         gradient.addColorStop(1, "#fff");
 
-        // 5. Set the source URL (this triggers the loading process)
-        img.src = "./pearl.png";
-        food_img.src = "./food.png";
-        sea_img.src = "./sea.jpg";
-        brick.src = "./brick.png"
+    
         keys = {}
         angle = -Math.PI / 2;
         d = 5 * Math.PI / 180;
-        let foods = [{ x: 300, y: 300, size: L }]
-
+        let foods = [{ x: 300, y: 300, size: DIAMETER }]
+       const rocketAR = 1.43122;
+       const RH = 20;
+       const RW = RH*rocketAR
         const rockets = [
-            { x: 50, y: 50, size: 20 }, 
-            { x: 50, y: H - 50, size: 20 },
-            { x: W-50, y: 50, size: 20 }, 
-            { x: W-50, y: H - 50, size: 20 },
+            { x: 50, y: 50, w: RW, h: RH, size:RW }, 
+            { x: 50, y: H - 50, w: RW, h: RH,size:RW },
+            { x: W-50, y: 50, w: RW, h: RH,size:RW }, 
+            { x: W-50, y: H - 50, w: RW, h: RH,size:RW },
         ]
 
         let speed = 1;
@@ -152,12 +158,12 @@
             var virtualhead = wrap(items[0]);
             var food = foods[foods.length - 1];
             
-            if (Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < 4*L) {
+            if (Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < 4*DIAMETER) {
                 eatAudio.play();
                 caughtFood = food;
                 while (true) {
-                    var x = Math.random() * (W - L)
-                    var y = Math.random() * (H - L)
+                    var x = Math.random() * (W - DIAMETER)
+                    var y = Math.random() * (H - DIAMETER)
                     let skip = false
                     for (var i = 0; i < bricks.length; ++i) {
                         if (collide({ x, y, size }, bricks[i])) {
@@ -166,7 +172,7 @@
                         }
                     }
                     if (!skip) {
-                        foods.push({ x: x, y: y, size: L });
+                        foods.push({ x: x, y: y, size: DIAMETER });
                         break;
                     }
                 }
@@ -176,15 +182,19 @@
                
             }
             if (caughtFood) {
-                
-                if (Math.hypot(virtualhead.x - caughtFood.x, virtualhead.y - caughtFood.y) <L) {
+                const u = Math.cos(angle);
+                const v = Math.sin(angle);
+
+                const target = {x: virtualhead.x + u * DIAMETER,y:virtualhead.y+v*DIAMETER};
+
+                if (Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y) <1) {
                     const VX = virtualhead.x - items[0].x;
                     const VY = virtualhead.y - items[0].y;
-                    items = [{ x: caughtFood.x - VX, y: caughtFood.y - VY, size: L }, ...items]
+                    items = [{ x: caughtFood.x - VX, y: caughtFood.y - VY, size: DIAMETER }, ...items]
                     caughtFood = undefined;
                 } else {
-                    caughtFood.x += (virtualhead.x - caughtFood.x) / 3
-                    caughtFood.y += (virtualhead.y - caughtFood.y) / 3
+                    caughtFood.x += (target.x - caughtFood.x) / 3
+                    caughtFood.y += (target.y - caughtFood.y) / 3
                 }
             }
             if (speed > maxSpeed) speed -= 0.02;
@@ -209,11 +219,10 @@
                 }
             }
 
-
-
             // Set the fill style and draw a rectangle
             ctx.fillStyle = "#fff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ctx.globalAlpha = 0.4;
 
             ctx.drawImage(sea_img, 0, 0, W, H);
@@ -227,7 +236,7 @@
                     var v = items[i - 1].y - items[i].y;
                     u /= dist;
                     v /= dist;
-                    var LAfterClip = L - 3;
+                    var LAfterClip = DIAMETER - 3;
                     const dx = u * (LAfterClip - dist) * 0.5
                     const dy = v * (LAfterClip - dist) * 0.5
                     items[i].x -= dx;
@@ -236,7 +245,6 @@
             }
 
             const drawImage = (img, x, y, w, cr) => {
-
                 ctx.beginPath();
                 ctx.arc(x, y, Math.max(0, w / 2 - cr), 0, Math.PI * 2);
                 ctx.save();
@@ -252,7 +260,7 @@
                 var item = items[i];
                 var vitem = wrap(item);
 
-                var w = L
+                var w = DIAMETER
                 var x = vitem.x
                 var y = vitem.y
 
@@ -270,11 +278,8 @@
 
             for (var i = 0; i < rockets.length; ++i) {
                 var rocket = rockets[i];
-                var w = 10;
-                ctx.fillStyle = "red"
                 if (rockets[i].invisible) continue;
-                ctx.fillRect(rocket.x - w / 2, rocket.y - w / 2, w, w);
-                //ctx.drawImage(food_img, food.x - food.size / 2, food.y - food.size / 2, food.size, food.size);
+                ctx.drawImage(slider, rocket.x - rocket.w / 2, rocket.y - rocket.h / 2, rocket.w,rocket.h);
             }
 
             for (var j = 0; j < bricks.length; ++j) {
