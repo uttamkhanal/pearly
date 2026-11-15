@@ -93,7 +93,7 @@
             { x: W-50, y: H - 50, w: RW, h: RH,size:RW },
         ]
 
-        let speed = 1;
+        let speed = 120;
         let score = 0;
         function wrap(item) {
             var x = item.x;
@@ -143,6 +143,8 @@
         let crash = false;
         let maxSpeed = speed;
         let caughtFood;
+        const dt = 1/60;
+
         function step() {
             if (keys["ArrowLeft"]) {
                 angle -= d;
@@ -151,15 +153,20 @@
                 angle += d;
             }
             if (!crash) {
-                items[0].x += speed * Math.cos(angle);
-                items[0].y += speed * Math.sin(angle);
+                items[0].x += speed * Math.cos(angle) * dt;
+                items[0].y += speed * Math.sin(angle) * dt;
 
             }
             var virtualhead = wrap(items[0]);
             var food = foods[foods.length - 1];
-            
-            if (!caughtFood&&Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y) < 4*DIAMETER) {
-                eatAudio.play();
+            const v2 = {x:food.x-virtualhead.x,y:food.y-virtualhead.y}
+            const distance =Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y);
+            v2.x/=distance;
+            v2.y/=distance;
+            const uu = Math.cos(angle);
+            const uv = Math.sin(angle);
+            const ang = Math.abs(Math.acos(uu*v2.x+uv*v2.y) * 180/Math.PI);
+            if (!caughtFood&&distance < 4*DIAMETER&&ang<=30) {
                 caughtFood = food;
                 
                 speed += 0.1;
@@ -168,48 +175,56 @@
                
             }
             if (caughtFood) {
-                const u = Math.cos(angle);
-                const v = Math.sin(angle);
+                let u = Math.cos(angle);
+                let v = Math.sin(angle);
 
                 const target = {x: virtualhead.x + u * DIAMETER,y:virtualhead.y+v*DIAMETER};
                 
                 // console.log('dist', Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y));
-                if (Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y) <10) {
+                const distance = Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y);
+                // console.log('eating');
+                const velocity = speed; //w pixels in 2 secs
+                const timeRequired = distance / velocity;
+                u = (caughtFood.x - target.x) / distance;
+                v = (caughtFood.y - target.y) / distance;
+                if (timeRequired >= dt && distance > DIAMETER) {
+                    caughtFood.x -= velocity * dt * u;
+                    caughtFood.y -= velocity * dt * v;
+                } else {
+                    eatAudio.play();
+
+                    caughtFood.x = target.x;
+                    caughtFood.y=target.y;
                     const VX = virtualhead.x - items[0].x;
                     const VY = virtualhead.y - items[0].y;
-                    items = [{ x: caughtFood.x - VX, y: caughtFood.y - VY, size: DIAMETER }, ...items]
+                    items = [{ x: target.x - VX, y: target.y - VY, size: DIAMETER }, ...items]
                     console.log('eat');
                     caughtFood.eaten=true;
                     caughtFood = undefined;
 
                     while (true) {
-                    var x = Math.random() * (W - DIAMETER)
-                    var y = Math.random() * (H - DIAMETER)
-                    let skip = false
-                    for (var i = 0; i < bricks.length; ++i) {
-                        if (collide({ x, y, size }, bricks[i])) {
-                            skip = true;
+                        var x = Math.random() * (W - DIAMETER)
+                        var y = Math.random() * (H - DIAMETER)
+                        let skip = false
+                        for (var i = 0; i < bricks.length; ++i) {
+                            if (collide({ x, y, size }, bricks[i])) {
+                                skip = true;
+                                break;
+                            }
+                        }
+                        if (!skip) {
+                            foods.push({ x: x, y: y, size: DIAMETER });
                             break;
                         }
                     }
-                    if (!skip) {
-                        foods.push({ x: x, y: y, size: DIAMETER });
-                        break;
-                    }
-                }
-                } else {
-                    // console.log('eating');
-
-                    caughtFood.x += (target.x - caughtFood.x) / 2
-                    caughtFood.y += (target.y - caughtFood.y) / 2
                 }
             }
-            if (speed > maxSpeed) speed -= 0.02;
+            if (speed > maxSpeed) speed -= 10;
             for (var j = 0; j < 1; ++j) {
                 for (var i = 0; i < rockets.length; ++i) {
 
                     if (collide(wrap({ ...items[j], size: items[j].size - 6 }), rockets[i])) {
-                        speed = 3;
+                        speed = 120+120;
                         rockets[i].invisible = true;
                         break;
                     }
