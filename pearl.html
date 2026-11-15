@@ -77,14 +77,6 @@
         brick.src = "./brick.png"
         slider.src = "./slider.png"
 
-        const gradient = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W);
-
-        // Add three color stops
-        gradient.addColorStop(0, "silver");
-        gradient.addColorStop(0.5, "white");
-        gradient.addColorStop(1, "#fff");
-
-
         keys = {}
         angle = -Math.PI / 2;
         d = 5 * Math.PI / 180;
@@ -256,7 +248,8 @@
                 }
             }
 
-            let iter = 2;
+            let iter = 32;
+
             while (iter--) {
                 for (var i = 1; i < items.length; ++i) {
                     var dist = Math.hypot(items[i].x - items[i - 1].x, items[i].y - items[i - 1].y);
@@ -265,8 +258,8 @@
                     u /= dist;
                     v /= dist;
                     var LAfterClip = DIAMETER - 3;
-                    const dx = u * (LAfterClip - dist) * 0.5
-                    const dy = v * (LAfterClip - dist) * 0.5
+                    const dx = u * (LAfterClip - dist) * 0.2
+                    const dy = v * (LAfterClip - dist) * 0.2
                     items[i].x -= dx;
                     items[i].y -= dy;
                 }
