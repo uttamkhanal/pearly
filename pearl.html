@@ -26,28 +26,34 @@
 
 <body>
     <div class="root">
-        <canvas id="myCanvas" width="500" height="500" style="border:1px solid rgba(100,100,100);">
+        <canvas id="myCanvas" width="800" height="700" style="border:1px solid rgba(100,100,100);">
             Your browser does not support the HTML canvas tag.
         </canvas>
     </div>
     <script>
         var items = [];
-        var DIAMETER = 18;
-        var W = 500;
-        var H = 500;
+        var DIAMETER = 24;
+        var W = 800;
+        var H = 700;
         for (var i = 0; i < 4; ++i) {
             items.push({ x: 50, y: 200 + i * DIAMETER, size: DIAMETER });
         }
+        const GSZ = 13;
         var bricksGrid = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 0, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 0, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+
         ]
         var canvas = document.getElementById("myCanvas");
         const ctx = canvas.getContext("2d");
@@ -63,7 +69,7 @@
             // 4. Draw the image onto the canvas at coordinates (x: 0, y: 0)
             ctx.drawImage(img, 0, 0);
         };
-    
+
         // 5. Set the source URL (this triggers the loading process)
         img.src = "./pearl.png";
         food_img.src = "./food.png";
@@ -78,21 +84,20 @@
         gradient.addColorStop(0.5, "white");
         gradient.addColorStop(1, "#fff");
 
-    
+
         keys = {}
         angle = -Math.PI / 2;
         d = 5 * Math.PI / 180;
         let foods = [{ x: 300, y: 300, size: DIAMETER }]
-       const rocketAR = 1.43122;
-       const RH = 20;
-       const RW = RH*rocketAR
+        const rocketAR = 1.43122;
+        const RH = 20;
+        const RW = RH * rocketAR
         const rockets = [
-            { x: 50, y: 50, w: RW, h: RH, size:RW }, 
-            { x: 50, y: H - 50, w: RW, h: RH,size:RW },
-            { x: W-50, y: 50, w: RW, h: RH,size:RW }, 
-            { x: W-50, y: H - 50, w: RW, h: RH,size:RW },
+            { x: 50, y: 50, w: RW, h: RH, size: RW },
+            { x: 50, y: H - 50, w: RW, h: RH, size: RW },
+            { x: W - 50, y: 50, w: RW, h: RH, size: RW },
+            { x: W - 50, y: H - 50, w: RW, h: RH, size: RW },
         ]
-
         let speed = 120;
         let score = 0;
         function wrap(item) {
@@ -106,13 +111,13 @@
         }
         let eatAudio = new Audio('./marble.mp3');
         let bricks = []
-        for (var i = 0; i < 9; ++i) {
-            for (var j = 0; j < 9; ++j) {
+        for (var i = 0; i < GSZ; ++i) {
+            for (var j = 0; j < GSZ; ++j) {
                 if (!bricksGrid[i][j]) continue;
 
-                var size = 40;
-                var ox = (W - size * 9) / 2;
-                var oy = (H - size * 9) / 2;
+                var size = 60;
+                var ox = (W - size * GSZ) / 2;
+                var oy = (H - size * GSZ) / 2;
                 var x = i * size;
                 var y = j * size;
                 bricks.push({ x: x + ox, y: y + oy, size: size })
@@ -143,7 +148,7 @@
         let crash = false;
         let maxSpeed = speed;
         let caughtFood;
-        const dt = 1/60;
+        const dt = 1 / 60;
 
         function step() {
             if (keys["ArrowLeft"]) {
@@ -159,27 +164,24 @@
             }
             var virtualhead = wrap(items[0]);
             var food = foods[foods.length - 1];
-            const v2 = {x:food.x-virtualhead.x,y:food.y-virtualhead.y}
-            const distance =Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y);
-            v2.x/=distance;
-            v2.y/=distance;
+            const v2 = { x: food.x - virtualhead.x, y: food.y - virtualhead.y }
+            const distance = Math.hypot(virtualhead.x - food.x, virtualhead.y - food.y);
+            v2.x /= distance;
+            v2.y /= distance;
             const uu = Math.cos(angle);
             const uv = Math.sin(angle);
-            const ang = Math.abs(Math.acos(uu*v2.x+uv*v2.y) * 180/Math.PI);
-            if (!caughtFood&&distance < 4*DIAMETER&&ang<=30) {
+            const ang = Math.abs(Math.acos(uu * v2.x + uv * v2.y) * 180 / Math.PI);
+
+            if (!caughtFood && distance < 4 * DIAMETER && ang <= 30) {
                 caughtFood = food;
-                
-                speed += 0.1;
-                maxSpeed = speed;
-                score++;
-               
             }
+
             if (caughtFood) {
                 let u = Math.cos(angle);
                 let v = Math.sin(angle);
 
-                const target = {x: virtualhead.x + u * DIAMETER,y:virtualhead.y+v*DIAMETER};
-                
+                const target = { x: virtualhead.x + u * DIAMETER, y: virtualhead.y + v * DIAMETER };
+
                 // console.log('dist', Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y));
                 const distance = Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y);
                 // console.log('eating');
@@ -192,14 +194,17 @@
                     caughtFood.y -= velocity * dt * v;
                 } else {
                     eatAudio.play();
+                    speed += 10;
+                    maxSpeed = speed;
+                    score++;
 
                     caughtFood.x = target.x;
-                    caughtFood.y=target.y;
+                    caughtFood.y = target.y;
                     const VX = virtualhead.x - items[0].x;
                     const VY = virtualhead.y - items[0].y;
                     items = [{ x: target.x - VX, y: target.y - VY, size: DIAMETER }, ...items]
                     console.log('eat');
-                    caughtFood.eaten=true;
+                    caughtFood.eaten = true;
                     caughtFood = undefined;
 
                     while (true) {
@@ -219,12 +224,14 @@
                     }
                 }
             }
-            if (speed > maxSpeed) speed -= 10;
+            if (speed > maxSpeed) speed -= 20 * dt;
             for (var j = 0; j < 1; ++j) {
                 for (var i = 0; i < rockets.length; ++i) {
-
+                    if (rockets[i].invisible) continue;
                     if (collide(wrap({ ...items[j], size: items[j].size - 6 }), rockets[i])) {
-                        speed = 120+120;
+                        console.log(speed)
+
+                        speed += 60;
                         rockets[i].invisible = true;
                         break;
                     }
@@ -234,7 +241,7 @@
             for (var j = 0; j < items.length; ++j) {
                 for (var i = 0; i < bricks.length; ++i) {
 
-                    if (collide(wrap({ ...items[j], size: items[j].size - 6 }), bricks[i])) {
+                    if (collide(wrap({ ...items[j], size: items[j].size - 10 }), bricks[i])) {
                         crash = true;
                     }
 
@@ -248,8 +255,8 @@
             ctx.globalAlpha = 0.4;
 
             ctx.drawImage(sea_img, 0, 0, W, H);
-            ctx.globalAlpha=1;
-            
+            ctx.globalAlpha = 1;
+
             let iter = 2;
             while (iter--) {
                 for (var i = 1; i < items.length; ++i) {
@@ -294,11 +301,11 @@
                 drawImage(food_img, food.x, food.y, food.size, 2)
 
             }
-            
+
             for (var i = 0; i < rockets.length; ++i) {
                 var rocket = rockets[i];
                 if (rockets[i].invisible) continue;
-                ctx.drawImage(slider, rocket.x - rocket.w / 2, rocket.y - rocket.h / 2, rocket.w,rocket.h);
+                ctx.drawImage(slider, rocket.x - rocket.w / 2, rocket.y - rocket.h / 2, rocket.w, rocket.h);
             }
 
             for (var j = 0; j < bricks.length; ++j) {
@@ -309,9 +316,9 @@
                 ctx.drawImage(brick, x, y, bricks[j].size, bricks[j].size);
 
             }
-            ctx.fillStyle = "rgb(0,0,0)";
+            ctx.fillStyle = "rgb(0,0,0,0.5)";
             ctx.font = "20px Ariel";
-            ctx.fillText("SCORE " + score, W - 80, 30);
+            ctx.fillText("SCORE " + score, W - 120, 30);
             if (crash) {
                 ctx.fillStyle = "#f00";
 
