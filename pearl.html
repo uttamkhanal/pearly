@@ -176,20 +176,28 @@
                 caughtFood = food;
             }
 
+            // Set the fill style and draw a rectangle
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.globalAlpha = 0.4;
+
+            ctx.drawImage(sea_img, 0, 0, W, H);
+            ctx.globalAlpha = 1;
+
             if (caughtFood) {
                 let u = Math.cos(angle);
                 let v = Math.sin(angle);
 
                 const target = { x: virtualhead.x + u * DIAMETER, y: virtualhead.y + v * DIAMETER };
 
-                // console.log('dist', Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y));
                 const distance = Math.hypot(caughtFood.x - target.x, caughtFood.y - target.y);
-                // console.log('eating');
-                const velocity = speed; //w pixels in 2 secs
+                const velocity = 1.5*speed; //w pixels in 2 secs
                 const timeRequired = distance / velocity;
                 u = (caughtFood.x - target.x) / distance;
                 v = (caughtFood.y - target.y) / distance;
-                if (timeRequired >= dt && distance > DIAMETER) {
+
+                if (timeRequired >= dt) {
                     caughtFood.x -= velocity * dt * u;
                     caughtFood.y -= velocity * dt * v;
                 } else {
@@ -247,15 +255,6 @@
 
                 }
             }
-
-            // Set the fill style and draw a rectangle
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.globalAlpha = 0.4;
-
-            ctx.drawImage(sea_img, 0, 0, W, H);
-            ctx.globalAlpha = 1;
 
             let iter = 2;
             while (iter--) {
