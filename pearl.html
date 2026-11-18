@@ -177,6 +177,9 @@
             ctx.drawImage(sea_img, 0, 0, W, H);
             ctx.globalAlpha = 1;
 
+            const VX = virtualhead.x - items[0].x;
+            const VY = virtualhead.y - items[0].y;
+
             if (caughtFood) {
                 let u = Math.cos(angle);
                 let v = Math.sin(angle);
@@ -189,6 +192,24 @@
                 u = (caughtFood.x - target.x) / distance;
                 v = (caughtFood.y - target.y) / distance;
 
+
+                
+                let U = caughtFood.x - virtualhead.x, V = caughtFood.y - virtualhead.y;
+                const D = Math.hypot(U,V);
+                U/=D;
+                V/=D;
+
+                const U_=V,V_=-U;
+
+                const T=DIAMETER-3;
+                // ctx.beginPath();
+                // ctx.fillStyle="rgba(255,255,255,0.3)"
+                // ctx.moveTo(caughtFood.x - U_*T/2, caughtFood.y - V_*T/2);
+                // ctx.lineTo(caughtFood.x + U_*T/2, caughtFood.y + V_*T/2);
+                // ctx.lineTo(virtualhead.x + U_*T/2, virtualhead.y + V_*T/2);
+                // ctx.lineTo(virtualhead.x - U_*T/2, virtualhead.y - V_*T/2);
+                // ctx.fill();
+
                 if (timeRequired >= dt) {
                     caughtFood.x -= velocity * dt * u;
                     caughtFood.y -= velocity * dt * v;
@@ -200,8 +221,6 @@
 
                     caughtFood.x = target.x;
                     caughtFood.y = target.y;
-                    const VX = virtualhead.x - items[0].x;
-                    const VY = virtualhead.y - items[0].y;
                     items = [{ x: target.x - VX, y: target.y - VY, size: DIAMETER }, ...items]
                     console.log('eat');
                     caughtFood.eaten = true;
