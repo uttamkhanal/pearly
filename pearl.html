@@ -94,10 +94,10 @@
         let score = 0;
         function wrap(item) {
             var x = item.x;
-            while (x > W) x = x - W;
+            while (x >= W) x = x - W;
             while (x < 0) x = W + x;
             var y = item.y;
-            if (y > H) y = y - H;
+            if (y >= H) y = y - H;
             while (y < 0) y = H + y;
             return { x: x, y: y, size: item.size };
         }
