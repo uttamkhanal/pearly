@@ -36,7 +36,7 @@
         var W = 800;
         var H = 700;
         for (var i = 0; i < 4; ++i) {
-            items.push({ x: 50, y: 200 + i * DIAMETER, size: DIAMETER });
+            items.push({ x: 50, y: 200 + i * DIAMETER, size: DIAMETER, opacity: 1 });
         }
         const GSZ = 13;
         var bricksGrid = [
@@ -180,6 +180,8 @@
             const VX = virtualhead.x - items[0].x;
             const VY = virtualhead.y - items[0].y;
 
+            let opV=0.1;
+
             if (caughtFood) {
                 let u = Math.cos(angle);
                 let v = Math.sin(angle);
@@ -221,8 +223,7 @@
 
                     caughtFood.x = target.x;
                     caughtFood.y = target.y;
-                    items = [{ x: target.x - VX, y: target.y - VY, size: DIAMETER }, ...items]
-                    console.log('eat');
+                    items = [{ x: target.x - VX, y: target.y - VY, size: DIAMETER, opacity: 1}, ...items]
                     caughtFood.eaten = true;
                     caughtFood = undefined;
 
@@ -248,8 +249,6 @@
                 for (var i = 0; i < rockets.length; ++i) {
                     if (rockets[i].invisible) continue;
                     if (collide(wrap({ ...items[j], size: items[j].size - 6 }), rockets[i])) {
-                        console.log(speed)
-
                         speed += 60;
                         rockets[i].invisible = true;
                         break;
@@ -284,12 +283,23 @@
                 }
             }
 
-            const drawImage = (img, x, y, w, cr) => {
+            if (crash) {
+                for (var i=0;i<items.length;++i) {
+                    if (items[i].opacity == 0) continue;
+                    items[i].opacity = Math.max(items[i].opacity - opV, 0)
+                    opV -= 0.01;
+                    opV =Math.max(opV, 0.1)
+                    break;
+                }
+            }
+
+            const drawImage = (img, x, y, w, cr, opacity) => {
                 ctx.beginPath();
                 ctx.arc(x, y, Math.max(0, w / 2 - cr), 0, Math.PI * 2);
                 ctx.save();
                 ctx.clip();
 
+                ctx.globalAlpha = opacity;
                 ctx.drawImage(img, x - w / 2, y - w / 2, w, w);
                 ctx.restore();
             }
@@ -304,8 +314,9 @@
                 var x = vitem.x
                 var y = vitem.y
 
-                drawImage(img, x, y, w, 1)
+                drawImage(img, x, y, w, 1, item.opacity)
             }
+            
             for (var i = 0; i < foods.length; ++i) {
                 var food = foods[i];
                 if (food.eaten) continue;
